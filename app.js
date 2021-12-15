@@ -3,12 +3,17 @@ const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const productRouter = require("./routers/product");
+require("dotenv/config");
 
 //middlewares
 
+//cors - start with cors
+app.use(cors());
+app.options("*", cors());
+
 //env
-require("dotenv/config");
 const api = process.env.API_URL;
 
 //json body parser
