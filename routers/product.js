@@ -18,6 +18,7 @@ router.post(`/add`, async (req, res) => {
     shortDescription: req.body.shortDescription,
     category: req.body.category,
     price: req.body.price,
+    isFeatured: req.body.isFeatured,
   });
 
   newProduct
@@ -35,7 +36,13 @@ router.post(`/add`, async (req, res) => {
 
 //Get all products
 router.get(`/`, (req, res) => {
-  Product.find()
+  let filter = {};
+
+  if (req.query.categories) {
+    filter = { category: req.query.categories.split(",") };
+  }
+
+  Product.find(filter)
     .populate("category")
     .then((productList) => {
       res.status(201).json(productList);
@@ -124,6 +131,7 @@ router.delete(`/delete/:productId`, (req, res) => {
     });
 });
 
+// get product count
 router.get(`/get/count`, async (req, res) => {
   const count = await Product.countDocuments({});
 
@@ -135,6 +143,31 @@ router.get(`/get/count`, async (req, res) => {
   res.status(201).json({
     productCount: count,
   });
+});
+
+// get featured product
+router.get(`/get/featured/:count`, (req, res) => {
+  const count = req.params.count ? req.params.count : 0;
+  Product.find({ isFeatured: true })
+    .limit(+count)
+    .then((productList) => {
+      if (!productList)
+        return res.status(400).json({
+          message: "No Featured Product Available",
+          success: false,
+        });
+
+      res.status(201).json({
+        products: productList,
+        success: true,
+      });
+    })
+    .catch((err) => {
+      res.status(400).json({
+        err: err,
+        success: false,
+      });
+    });
 });
 
 module.exports = router;
