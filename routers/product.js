@@ -20,8 +20,8 @@ router.get(`/`, (req, res) => {
 });
 
 //Create new product
-router.post(`/add`, (req, res) => {
-  const category = Category.findById(req.body.category);
+router.post(`/add`, async (req, res) => {
+  const category = await Category.findById(req.body.category);
   if (!category) return res.status(400).send("Category does not exist");
 
   const newProduct = new Product({
