@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const Product = require("../models/product");
+const { Product } = require("../models/product");
+const { Category } = require("../models/category");
 
 // API'S
 
@@ -20,10 +21,16 @@ router.get(`/`, (req, res) => {
 
 //Create new product
 router.post(`/add`, (req, res) => {
+  const category = Category.findById(req.body.category);
+  if (!category) return res.status(400).send("Category does not exist");
+
   const newProduct = new Product({
     name: req.body.name,
     imageUrl: req.body.imageUrl,
     countInStock: req.body.countInStock,
+    shortDescription: req.body.shortDescription,
+    category: req.body.category,
+    price: req.body.price,
   });
 
   newProduct
