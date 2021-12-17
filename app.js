@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const productRouter = require("./routers/product");
 const categoryRouter = require("./routers/category");
+const userRouter = require("./routers/user");
 require("dotenv/config");
 
 //middlewares
@@ -27,7 +28,10 @@ app.use(morgan("tiny"));
 app.use(`${api}/products`, productRouter);
 
 //category router
-app.use(`${api}/category`, categoryRouter);
+app.use(`${api}/categories`, categoryRouter);
+
+//user router
+app.use(`${api}/users`, userRouter);
 
 //connect to database
 mongoose
