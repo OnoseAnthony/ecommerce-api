@@ -132,8 +132,8 @@ router.delete(`/delete/:productId`, (req, res) => {
 });
 
 // get product count
-router.get(`/get/count`, async (req, res) => {
-  const count = await Product.countDocuments({});
+router.get(`/get/count`, (req, res) => {
+  const count = Product.countDocuments((count) => count);
 
   if (!count)
     return res

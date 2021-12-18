@@ -1,10 +1,10 @@
 const express = require("express");
-// const expressJwt = require("express-jwt");
 const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const authJwt = require("./helpers/jwt");
+const errorHandler = require("./helpers/error_handler");
 const cors = require("cors");
 const productRouter = require("./routers/product");
 const categoryRouter = require("./routers/category");
@@ -26,18 +26,11 @@ app.use(bodyParser.json());
 // http request logger
 app.use(morgan("tiny"));
 
-// //env
-// const secret = process.env.SECRET_JWT_SEED_PHRASE;
-
-// //jwt auth
-// app.use(
-//   expressJwt({
-//     secret,
-//     algorithms: ["HS256"],
-//   })
-// );
-
+// express jwt protect api
 app.use(authJwt());
+
+// express jwt protect api
+app.use(errorHandler);
 
 //product router
 app.use(`${api}/products`, productRouter);

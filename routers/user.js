@@ -112,50 +112,43 @@ router.get(`/:userId`, (req, res) => {
 });
 
 //Get total number of users - statistics
-router.get(`/get/count`, (req, res) => {
-  User.countDocuments({})
-    .then((userCount) => {
-      if (!userCount)
-        return res.status(500).json({
-          error: true,
-          success: false,
-          message: "Error occurred while fetching user count!!",
-        });
-      res.status(201).json({
-        error: false,
-        success: true,
-        message: { userCount: userCount },
-      });
-    })
-    .catch((err) => {
-      res.status(400).json({
-        error: true,
-        success: false,
-        message: err,
-      });
+router.get(`/get/count`, async (req, res) => {
+  const userCount = await User.countDocuments({});
+
+  if (!userCount)
+    return res.status(500).json({
+      error: true,
+      success: false,
+      message: "Error occurred while fetching user count!!",
     });
+
+  res.status(201).json({
+    error: false,
+    success: true,
+    message: { userCount: userCount },
+  });
 });
 
 //Get all admin users
 router.get(`/get/admin`, (req, res) => {
-  User.find({})
+  User.find({ isAdmin: true })
     .then((adminList) => {
-      if (!adminList)
+      if (adminList.length < 1) {
         return res.status(500).json({
           message: "No User with Admin privileges found !!",
           success: false,
           error: true,
         });
-
+      }
       res.status(201).json({
-        message: productList,
+        message: adminList,
         success: true,
         error: false,
       });
     })
     .catch((err) => {
       res.status(400).json({
-        err: err,
+        err: "An error occured.",
         success: false,
         error: true,
       });
@@ -248,6 +241,7 @@ router.post(`/login`, async (req, res) => {
     const token = jwt.sign(
       {
         userId: user.id,
+        isAdmin: user.isAdmin,
       },
       process.env.SECRET_JWT_SEED_PHRASE,
       { expiresIn: "1d" }
