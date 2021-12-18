@@ -9,6 +9,7 @@ const cors = require("cors");
 const productRouter = require("./routers/product");
 const categoryRouter = require("./routers/category");
 const userRouter = require("./routers/user");
+const orderRouter = require("./routers/order");
 require("dotenv/config");
 
 //middlewares
@@ -32,14 +33,17 @@ app.use(authJwt());
 // express jwt protect api
 app.use(errorHandler);
 
+//user router
+app.use(`${api}/users`, userRouter);
+
 //product router
 app.use(`${api}/products`, productRouter);
 
 //category router
 app.use(`${api}/categories`, categoryRouter);
 
-//user router
-app.use(`${api}/users`, userRouter);
+//orders router
+app.use(`${api}/orders`, orderRouter);
 
 //connect to database
 mongoose
