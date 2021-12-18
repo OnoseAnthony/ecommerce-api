@@ -3,8 +3,12 @@ const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const authJwt = require("./helpers/jwt");
+const errorHandler = require("./helpers/error_handler");
 const cors = require("cors");
 const productRouter = require("./routers/product");
+const categoryRouter = require("./routers/category");
+const userRouter = require("./routers/user");
 require("dotenv/config");
 
 //middlewares
@@ -22,8 +26,20 @@ app.use(bodyParser.json());
 // http request logger
 app.use(morgan("tiny"));
 
+// express jwt protect api
+app.use(authJwt());
+
+// express jwt protect api
+app.use(errorHandler);
+
 //product router
 app.use(`${api}/products`, productRouter);
+
+//category router
+app.use(`${api}/categories`, categoryRouter);
+
+//user router
+app.use(`${api}/users`, userRouter);
 
 //connect to database
 mongoose
