@@ -3,6 +3,8 @@ const router = express.Router();
 const { User } = require("../models/user");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv/config");
 
 // API'S
 
@@ -17,7 +19,10 @@ router.post(`/add`, async (req, res) => {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
-    passwordHash: bcrypt.hashSync(req.body.password, 10),
+    passwordHash: bcrypt.hashSync(
+      req.body.password,
+      process.env.SECRET_PASSWORD_SEED_PHRASE
+    ),
     phone: req.body.phone,
     isAdmin: req.body.isAdmin,
     apartmentNo: req.body.apartmentNo,
@@ -59,6 +64,7 @@ router.get(`/`, (req, res) => {
     userFilter = { users: req.query.users.split(",") };
   }
   User.find(userFilter)
+    .select("-passwordHash")
     .then((userList) => {
       if (!userList)
         return res.status(500).json({
@@ -89,6 +95,7 @@ router.get(`/:userId`, (req, res) => {
     return res.status(400).send("User Id is not valid!!");
 
   User.findById(userId)
+    .select("-passwordHash")
     .then((user) => {
       if (!user)
         return res.status(500).json({
@@ -230,6 +237,29 @@ router.delete(`/:id`, (req, res) => {
         error: true,
       });
     });
+});
+
+router.post(`/login`, async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) return res.status(400).send("Email does not exist!!");
+
+  if (user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
+    const token = jwt.sign(
+      {
+        userId: user.id,
+      },
+      process.env.SECRET_JWT_SEED_PHRASE,
+      { expiresIn: "1d" }
+    );
+    return res.status(201).json({
+      error: false,
+      success: true,
+      message: { user: user.email, token: token },
+    });
+  } else {
+    res.status(400).send("Incorrect Password");
+  }
 });
 
 module.exports = router;
