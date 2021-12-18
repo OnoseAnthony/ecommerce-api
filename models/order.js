@@ -22,6 +22,10 @@ const orderSchema = mongoose.Schema({
     required: true,
     default: "pending",
   },
+  phone: {
+    type: String,
+    default: "",
+  },
   shippingAddress: {
     type: String,
     required: true,
@@ -52,13 +56,13 @@ const orderSchema = mongoose.Schema({
   },
 });
 
-categorySchema.virtual("id").get(function () {
+orderSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
-categorySchema.set("toJSON", {
+orderSchema.set("toJSON", {
   virtuals: true,
 });
 
 // MODEL
-exports.Order = mongoose.mongoose.mongoose("Orders", orderSchema);
+exports.Order = mongoose.model("Orders", orderSchema);

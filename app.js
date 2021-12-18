@@ -43,7 +43,7 @@ app.use(`${api}/products`, productRouter);
 app.use(`${api}/categories`, categoryRouter);
 
 //orders router
-app.use(`${api}/ordrs`, orderRouter);
+app.use(`${api}/orders`, orderRouter);
 
 //connect to database
 mongoose
