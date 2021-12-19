@@ -27,6 +27,9 @@ app.use(bodyParser.json());
 // http request logger
 app.use(morgan("tiny"));
 
+//static dir
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
+
 // express jwt protect api
 app.use(authJwt());
 

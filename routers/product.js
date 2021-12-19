@@ -3,17 +3,50 @@ const router = express.Router();
 const { Product } = require("../models/product");
 const { Category } = require("../models/category");
 const mongoose = require("mongoose");
+const multer = require("multer");
+
+const FILE_TYPE_MAP = {
+  "image/png": "png",
+  "image/jpeg": "jpeg",
+  "image/jpg": "jpg",
+};
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const isValid = FILE_TYPE_MAP[file.mimetype];
+    let uploadError = new Error("Invalid image type");
+
+    if (isValid) {
+      uploadError = null;
+    }
+
+    cb(uploadError, "public/uploads");
+  },
+  filename: function (req, file, cb) {
+    const fileName = file.originalname.split(" ").join("-").split(".")[0];
+    const extension = FILE_TYPE_MAP[file.mimetype];
+    cb(null, `${fileName}-${Date.now()}.${extension}`);
+  },
+});
+
+const uploadOptions = multer({ storage: storage });
 
 // API'S
 
 //Create new product
-router.post(`/add`, async (req, res) => {
+router.post(`/add`, uploadOptions.single("image"), async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) return res.status(400).send("Category does not exist");
 
+  const file = req.file;
+  if (!file) return res.status(400).send("Image is required!!");
+
+  const fileName = file.filename;
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+
   const newProduct = new Product({
     name: req.body.name,
-    imageUrl: req.body.imageUrl,
+    imageUrl: `${basePath}${fileName}`,
     countInStock: req.body.countInStock,
     shortDescription: req.body.shortDescription,
     category: req.body.category,
@@ -106,6 +139,45 @@ router.put(`/:productId`, async (req, res) => {
       });
     });
 });
+
+// add multiple images
+router.put(
+  "/gallery-images/:productId",
+  uploadOptions.array("images", 10),
+  async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.productId))
+      return res.status(400).send("Invalid Id");
+
+    const files = req.files;
+    let imagePaths = [];
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+
+    if (files) {
+      files.map((file) => {
+        imagePaths.push(`${basePath}${file.filename}`);
+      });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        images: imagePaths,
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!product)
+      return res.status(500).send("the gallery cannot be updated!!");
+
+    res.status(201).json({
+      error: false,
+      success: true,
+      messages: product,
+    });
+  }
+);
 
 //Delete a product by id
 router.delete(`/delete/:productId`, (req, res) => {

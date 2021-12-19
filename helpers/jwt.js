@@ -15,6 +15,7 @@ function authJwt() {
       `${baseUrl}/users/add`,
       { url: /\/api\/v1\/products(.*)/, methods: ["GET", "options"] }, //regular expression to capture all the get methods in the product route
       { url: /\/api\/v1\/categories(.*)/, methods: ["GET", "options"] },
+      { url: /\/public\/uploads(.*)/, methods: ["GET", "options"] },
     ],
   });
 }
