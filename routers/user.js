@@ -233,6 +233,19 @@ router.delete(`/:id`, (req, res) => {
 });
 
 router.post(`/login`, async (req, res) => {
+  if (!req.body.password || !req.body.email)
+    return res
+      .status(400)
+      .send(
+        `${
+          !req.body.password && !req.body.email
+            ? "Email and Password"
+            : !req.body.password
+            ? " Password"
+            : "Email"
+        }` + " is Required!!!"
+      );
+
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) return res.status(400).send("Email does not exist!!");
